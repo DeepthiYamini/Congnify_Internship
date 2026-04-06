@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API User Directory</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>Global Team Directory</h1>
+    <p>Click the button below to retrieve real-time data from our servers.</p>
+    <button id="fetch-btn">Sync Team Data</button>
+  </header>
+
+  <main>
+    <div id="loader" class="hidden">Loading member data...</div>
+    <div id="user-container" class="user-grid">
+      <!-- Data will be injected here by JavaScript -->
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
