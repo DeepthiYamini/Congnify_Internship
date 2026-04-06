@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>WhatsApp Web Clone | Cognifyz Responsive Design</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-icon">💬</div>
+                <div class="brand">WhatsApp <span>Cognifyz Clone</span></div>
+            </div>
+            <div class="header-icons">
+                <span>🔔</span>
+                <span>👤</span>
+                <span>⋮</span>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Sidebar (Chats List) -->
+            <div class="sidebar" id="sidebar">
+                <div class="search-bar">
+                    <div class="search-box">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Search or start new chat" id="searchChat">
+                    </div>
+                </div>
+                <ul class="chat-list" id="chatList">
+                    <!-- Dynamic chat items from JS -->
+                </ul>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chatArea">
+                <div class="chat-header">
+                    <button class="back-button" id="backBtn" aria-label="Back to chats">←</button>
+                    <div class="avatar" id="chatAvatar">DS</div>
+                    <div class="contact-name" id="contactName">Data Science Group</div>
+                </div>
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="message-input-area">
+                    <div class="input-icons">
+                        <span>😊</span>
+                        <span>📎</span>
+                    </div>
+                    <input type="text" placeholder="Type a message" id="messageInput">
+                    <button class="send-btn" id="sendMsgBtn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chat Data matching your image
+        const chatsData = [
+            {
+                id: 1,
+                name: "Alice Johnson",
+                avatar: "AJ",
+                lastMsg: "Hey! How are you?",
+                timestamp: "10:32",
+                messages: [
+                    { text: "Hey! How are you?", type: "received", time: "10:30" },
+                    { text: "I'm good, thanks! How about you?", type: "sent", time: "10:32" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Cognifyz Team",
+                avatar: "CT",
+                lastMsg: "Great work on the responsive design!",
+                timestamp: "09:15",
+                messages: [
+                    { text: "Great work on the responsive design!", type: "received", time: "09:15" },
+                    { text: "Thank you! I've implemented all media queries.", type: "sent", time: "09:17" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Michael Lee",
+                avatar: "ML",
+                lastMsg: "Let's catch up later",
+                timestamp: "Yesterday",
+                messages: [
+                    { text: "Let's catch up later", type: "received", time: "Yesterday" },
+                    { text: "Sure, let me know when you're free", type: "sent", time: "Yesterday" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Data Science Group",
+                avatar: "DS",
+                lastMsg: "New dataset uploaded",
+                timestamp: "15:20",
+                messages: [
+                    { text: "Hey all, check the new data pipeline", type: "received", time: "15:10" },
+                    { text: "Awesome, I'll review it.", type: "sent", time: "15:20" }
+                ]
+            }
+        ];
+
+        let currentChatId = 4; // Default to Data Science Group
+
+        function renderChatList() {
+            const chatListEl = document.getElementById('chatList');
+            if (!chatListEl) return;
+            chatListEl.innerHTML = '';
+            chatsData.forEach(chat => {
+                const li = document.createElement('li');
+                li.className = 'chat-item';
+                if (currentChatId === chat.id) li.classList.add('active');
+                li.setAttribute('data-id', chat.id);
+                li.innerHTML = `
+                    <div class="avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">
+                            ${chat.name}
+                            <span class="time">${chat.timestamp}</span>
+                        </div>
+                        <div class="last-msg">${chat.lastMsg}</div>
+                    </div>
+                `;
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openChat(chat.id);
+                });
+                chatListEl.appendChild(li);
+            });
+        }
+
+        function openChat(chatId) {
+            const chat = chatsData.find(c => c.id === chatId);
+            if (!chat) return;
+            currentChatId = chat.id;
+            
+            document.getElementById('contactName').innerText = chat.name;
+            document.getElementById('chatAvatar').innerText = chat.avatar;
+            
+            const messagesContainer = document.getElementById('messagesContainer');
+            messagesContainer.innerHTML = '';
+            
+            if (chat.messages && chat.messages.length) {
+                chat.messages.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `message ${msg.type === 'sent' ? 'sent' : 'received'}`;
+                    msgDiv.innerHTML = `
+                        <div>${msg.text}</div>
+                        <div class="message-time">${msg.time}</div>
+                    `;
+                    messagesContainer.appendChild(msgDiv);
+                });
+            }
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            const msgInput = document.getElementById('messageInput');
+            if (msgInput) msgInput.disabled = false;
+            
+            if (window.innerWidth <= 700) {
+                document.body.classList.add('mobile-chat-open');
+            }
+            renderChatList();
+        }
+
+        function sendMessage() {
+            const inputEl = document.getElementById('messageInput');
+            const messageText = inputEl.value.trim();
+            if (!messageText || currentChatId === null) return;
+            
+            const currentChat = chatsData.find(c => c.id === currentChatId);
+            if (!currentChat) return;
+            
+            const now = new Date();
+            let timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const newMessage = {
+                text: messageText,
+                type: 'sent',
+                time: timeString
+            };
+            
+            currentChat.messages.push(newMessage);
+            currentChat.lastMsg = messageText.length > 30 ? messageText.slice(0, 27) + '...' : messageText;
+            currentChat.timestamp = timeString;
+            
+            openChat(currentChat.id);
+            inputEl.value = '';
+            
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+            renderChatList();
+        }
+
+        function filterChats(searchTerm) {
+            const chatItems = document.querySelectorAll('.chat-item');
+            const searchLower = searchTerm.toLowerCase();
+            chatItems.forEach((item, index) => {
+                const chatName = chatsData[index]?.name.toLowerCase() || '';
+                if (chatName.includes(searchLower)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function setupMobileEvents() {
+            const backBtn = document.getElementById('backBtn');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => {
+                    document.body.classList.remove('mobile-chat-open');
+                });
+            }
+            
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 700) {
+                    document.body.classList.remove('mobile-chat-open');
+                } else {
+                    if (currentChatId !== null && window.innerWidth <= 700) {
+                        if (!document.body.classList.contains('mobile-chat-open') && currentChatId) {
+                            document.body.classList.add('mobile-chat-open');
+                        }
+                    } else if (currentChatId === null && window.innerWidth <= 700) {
+                        document.body.classList.remove('mobile-chat-open');
+                    }
+                }
+                renderChatList();
+            });
+        }
+
+        function attachSendEvents() {
+            const sendBtn = document.getElementById('sendMsgBtn');
+            const msgInput = document.getElementById('messageInput');
+            if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+            if (msgInput) {
+                msgInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendMessage();
+                });
+            }
+            const searchInput = document.getElementById('searchChat');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => filterChats(e.target.value));
+            }
+        }
+
+        function init() {
+            renderChatList();
+            attachSendEvents();
+            setupMobileEvents();
+            openChat(4); // Open Data Science Group by default
+        }
+        
+        init();
+    </script>
+</body>
+</html>
