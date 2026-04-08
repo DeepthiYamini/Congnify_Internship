@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEONSASS — The Future Is Here</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css">
+  <!-- In production: compile styles.scss → styles.css and link it below -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- ─── NAVBAR ─── -->
+  <nav class="navbar">
+    <div class="navbar__container">
+      <a href="/" class="navbar__logo">NEON<span>SASS</span></a>
+      <div class="navbar__bars" id="mobile-menu" aria-label="Toggle menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+      <ul class="navbar__menu" id="nav-menu">
+        <li class="navbar__item"><a href="#" class="navbar__links">Home</a></li>
+        <li class="navbar__item"><a href="#signup-section" class="button">Get Started</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero">
+    <div class="hero__content">
+      <div class="hero__text">
+        <h1 class="glitch-text" data-text="THE FUTURE IS HERE">THE FUTURE IS HERE</h1>
+        <p>Experience the next generation of web design with compiled logic. Write less. Ship more. Build the impossible.</p>
+        <div class="hero__actions">
+          <a href="#signup-section" class="btn-primary">Join the Colony</a>
+        </div>
+      </div>
+
+      <div class="hero__visual">
+        <div class="blob-shape"></div>
+        <div class="hero__corner hero__corner--tl"></div>
+        <div class="hero__corner hero__corner--br"></div>
+        <div class="hero__img-wrapper">
+          <!-- SVG placeholder -->
+          <svg class="hero__img" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="imgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   style="stop-color:#00f2fe;stop-opacity:0.15"/>
+                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.05"/>
+              </linearGradient>
+              <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   style="stop-color:#00f2fe;stop-opacity:0.6"/>
+                <stop offset="50%"  style="stop-color:#ff0055;stop-opacity:0.4"/>
+                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.6"/>
+              </linearGradient>
+            </defs>
+            <polygon points="170,20 310,95 310,245 170,320 30,245 30,95" fill="url(#imgGrad)" stroke="url(#hexGrad)" stroke-width="1.5"/>
+            <polygon points="170,55 275,113 275,227 170,285 65,227 65,113" fill="none" stroke="rgba(0,242,254,0.15)" stroke-width="1"/>
+            <polygon points="170,90 240,130 240,210 170,250 100,210 100,130" fill="none" stroke="rgba(0,242,254,0.1)" stroke-width="1"/>
+            <circle cx="170" cy="170" r="40" fill="none" stroke="rgba(0,242,254,0.3)" stroke-width="1.5"/>
+            <circle cx="170" cy="170" r="25" fill="rgba(0,242,254,0.05)" stroke="rgba(0,242,254,0.5)" stroke-width="1"/>
+            <text x="170" y="178" text-anchor="middle" fill="#00f2fe" font-family="Orbitron" font-size="20" font-weight="900" opacity="0.8">NS</text>
+            <line x1="170" y1="20"  x2="170" y2="55"  stroke="rgba(0,242,254,0.4)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="310" y1="245" x2="275" y2="227" stroke="rgba(0,242,254,0.4)" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="30"  y1="95"  x2="65"  y2="113" stroke="rgba(0,242,254,0.4)" stroke-width="1" stroke-dasharray="3,3"/>
+            <circle cx="170" cy="20"  r="3" fill="#00f2fe" opacity="0.8"/>
+            <circle cx="310" cy="95"  r="3" fill="#4facfe" opacity="0.8"/>
+            <circle cx="310" cy="245" r="3" fill="#ff0055" opacity="0.8"/>
+            <circle cx="170" cy="320" r="3" fill="#00f2fe" opacity="0.8"/>
+            <circle cx="30"  cy="245" r="3" fill="#4facfe" opacity="0.8"/>
+            <circle cx="30"  cy="95"  r="3" fill="#ff0055" opacity="0.8"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="hero__stats">
+        <div class="stat">
+          <span class="stat__number" id="stat1">0</span>
+          <span class="stat__label">Active Nodes</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" id="stat2">0</span>
+          <span class="stat__label">Lines Compiled</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" id="stat3">0%</span>
+          <span class="stat__label">Uptime</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" id="stat4">0ms</span>
+          <span class="stat__label">Avg Render</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SIGNUP ─── -->
+  <section class="signup" id="signup-section">
+    <div class="signup__card">
+      <span class="corner corner--tl"></span>
+      <span class="corner corner--tr"></span>
+      <span class="corner corner--bl"></span>
+      <span class="corner corner--br"></span>
+
+      <div class="signup__info">
+        <div class="signup__badge">&#x25CF; Colony Access</div>
+        <h3>Join the Rebellion</h3>
+        <p>Stop waiting for the future. Build it with us.</p>
+      </div>
+
+      <form class="signup__form" id="signupForm">
+        <div class="input-group">
+          <input type="text" placeholder=" " id="fullname" required>
+          <span class="input-label">Full Name</span>
+          <span class="line"></span>
+        </div>
+        <div class="input-group">
+          <input type="email" placeholder=" " id="email" required>
+          <span class="input-label">Email Address</span>
+          <span class="line"></span>
+        </div>
+        <button type="submit" class="signup__submit">
+          Initialize Access <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <p class="signup__note">By joining you agree to our <a href="#">Terms of Colony</a></p>
+    </div>
+  </section>
+
+  <script src="main.js"></script>
+</body>
+</html>

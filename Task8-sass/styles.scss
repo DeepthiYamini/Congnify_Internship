@@ -1,0 +1,790 @@
+// ─── VARIABLES ───────────────────────────────────────────────────────────────
+$primary:       #00f2fe;
+$secondary:     #4facfe;
+$accent:        #ff0055;
+$bg:            #0a0b10;
+$glass:         rgba(255, 255, 255, 0.05);
+$font-display:  'Orbitron', monospace;
+$font-body:     'Rajdhani', sans-serif;
+
+// CSS custom properties (for runtime use in JS / SVG)
+:root {
+  --primary:      #{$primary};
+  --secondary:    #{$secondary};
+  --accent:       #{$accent};
+  --bg:           #{$bg};
+  --glass:        #{$glass};
+  --font-display: #{$font-display};
+  --font-body:    #{$font-body};
+}
+
+// ─── MIXINS ──────────────────────────────────────────────────────────────────
+@mixin glow($color, $spread: 12px) {
+  text-shadow: 0 0 $spread $color, 0 0 ($spread * 2.5) $color;
+}
+
+@mixin box-glow($color, $opacity: 0.35) {
+  box-shadow: 0 0 25px rgba($color, $opacity);
+}
+
+@mixin clip-skew($size: 8px) {
+  clip-path: polygon(#{$size} 0, 100% 0, calc(100% - #{$size}) 100%, 0 100%);
+}
+
+@mixin corner-border($size: 16px, $color: $primary, $width: 2px) {
+  position: absolute;
+  width: $size;
+  height: $size;
+  border-color: $color;
+  border-style: solid;
+}
+
+// ─── RESET & BASE ─────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: $bg;
+  color: #fff;
+  font-family: $font-body;
+  overflow-x: hidden;
+  cursor: none;
+
+  // Scanlines overlay
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.07) 2px,
+      rgba(0, 0, 0, 0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  // Noise grain
+  &::after {
+    content: '';
+    position: fixed;
+    inset: -200%;
+    width: 400%;
+    height: 400%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 8999;
+    animation: grain 0.5s steps(2) infinite;
+  }
+}
+
+// ─── ANIMATIONS ──────────────────────────────────────────────────────────────
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10%       { transform: translate(-3%, -3%); }
+  30%       { transform: translate(3%, -3%); }
+  50%       { transform: translate(-3%, 3%); }
+  70%       { transform: translate(3%, 3%); }
+  90%       { transform: translate(-3%, 1%); }
+}
+
+@keyframes glitch-1 {
+  0%, 94%, 100% { transform: none; opacity: 0; }
+  95%  { transform: translate(-3px, 1px); opacity: 0.8; filter: hue-rotate(90deg); }
+  97%  { transform: translate(3px, -1px); opacity: 0.8; }
+  99%  { transform: translate(-1px, 2px); opacity: 0.5; }
+}
+
+@keyframes glitch-2 {
+  0%, 96%, 100% { transform: none; opacity: 0; }
+  97% { transform: translate(4px, -2px); opacity: 0.6; filter: hue-rotate(-60deg); }
+  99% { transform: translate(-2px, 1px); opacity: 0.6; }
+}
+
+@keyframes glitch-fade {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.25) rotate(30deg); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+// ─── CUSTOM CURSOR ────────────────────────────────────────────────────────────
+.cursor {
+  width: 12px;
+  height: 12px;
+  background: $primary;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: screen;
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid $primary;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.15s ease, width 0.3s, height 0.3s, opacity 0.3s;
+  opacity: 0.5;
+}
+
+// ─── NAVBAR ──────────────────────────────────────────────────────────────────
+.navbar {
+  background: $glass;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 50px;
+  }
+
+  &__logo {
+    font-family: $font-display;
+    font-size: 1.3rem;
+    font-weight: 900;
+    text-decoration: none;
+    color: #fff;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+
+    span {
+      color: $primary;
+      @include glow($primary);
+    }
+  }
+
+  &__menu {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__links {
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: $font-display;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      width: 0;
+      height: 1px;
+      background: $primary;
+      transition: 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    &:hover {
+      color: $primary;
+      @include glow($primary, 8px);
+
+      &::after { width: 70%; }
+    }
+  }
+
+  &__bars {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+  }
+}
+
+.bar {
+  width: 25px;
+  height: 2px;
+  background: $primary;
+  transition: 0.3s;
+}
+
+// ─── SHARED BUTTON ───────────────────────────────────────────────────────────
+.button {
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid $primary;
+  color: $primary;
+  font-family: $font-display;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  @include clip-skew(8px);
+
+  &:hover {
+    background: $primary;
+    color: #000;
+    @include box-glow($primary, 0.4);
+  }
+}
+
+// ─── HERO ─────────────────────────────────────────────────────────────────────
+.hero {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 70% 30%, #1a1b25 0%, $bg 65%);
+  position: relative;
+  overflow: hidden;
+
+  // Grid lines background
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 242, 254, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-width: 1200px;
+    width: 100%;
+    align-items: center;
+    padding: 80px 50px;
+    gap: 60px;
+    position: relative;
+    z-index: 2;
+  }
+
+  &__text {
+    p {
+      font-size: 1.15rem;
+      color: #8a8fa8;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+      animation: slideUp 0.6s 0.2s ease both;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: slideUp 0.6s 0.35s ease both;
+  }
+
+  &__visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: slideUp 0.7s 0.1s ease both;
+  }
+
+  &__corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-color: $primary;
+    border-style: solid;
+    opacity: 0.4;
+
+    &--tl { top: 0;    left: 0;  border-width: 2px 0 0 2px; }
+    &--br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+  }
+
+  &__img-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 340px;
+    height: 340px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      background: linear-gradient(135deg, $primary, $accent, $secondary);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: spin-slow 12s linear infinite;
+    }
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    filter: saturate(1.2) contrast(1.05);
+    position: relative;
+    z-index: 1;
+    display: block;
+  }
+
+  &__stats {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 60px;
+    padding-top: 60px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    animation: slideUp 0.6s 0.5s ease both;
+  }
+}
+
+// ─── GLITCH TEXT ─────────────────────────────────────────────────────────────
+.glitch-text {
+  font-family: $font-display;
+  font-size: clamp(2.2rem, 4.5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 24px;
+  color: #fff;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, $primary, $secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glitch-fade 0.5s ease forwards;
+
+  &::before,
+  &::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, $primary, $secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  &::before {
+    animation: glitch-1 3s infinite linear;
+    clip-path: polygon(0 10%, 100% 10%, 100% 40%, 0 40%);
+  }
+
+  &::after {
+    animation: glitch-2 3s infinite linear;
+    clip-path: polygon(0 60%, 100% 60%, 100% 90%, 0 90%);
+  }
+}
+
+// ─── BLOB ────────────────────────────────────────────────────────────────────
+.blob-shape {
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  background: linear-gradient(45deg, $primary, $secondary);
+  filter: blur(90px);
+  opacity: 0.2;
+  border-radius: 50%;
+  animation: pulse 8s infinite alternate;
+}
+
+// ─── STAT ────────────────────────────────────────────────────────────────────
+.stat {
+  &__number {
+    font-family: $font-display;
+    font-size: 2rem;
+    font-weight: 900;
+    color: $primary;
+    text-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+    display: block;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: #555d7a;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+  }
+}
+
+// ─── PRIMARY BUTTON ──────────────────────────────────────────────────────────
+.btn-primary {
+  padding: 14px 32px;
+  background: $primary;
+  color: #000;
+  font-family: $font-display;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  @include clip-skew(12px);
+  box-shadow: 0 0 25px rgba(0, 242, 254, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: 0.4s ease;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 30px rgba(0, 242, 254, 0.5);
+
+    &::after { transform: translateX(100%); }
+  }
+}
+
+// ─── SECONDARY BUTTON ────────────────────────────────────────────────────────
+.btn-secondary {
+  padding: 14px 32px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: $font-display;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  @include clip-skew(12px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $secondary;
+    color: $secondary;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.2);
+  }
+}
+
+// ─── SIGNUP ──────────────────────────────────────────────────────────────────
+.signup {
+  padding: 120px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07080d;
+  position: relative;
+  overflow: hidden;
+
+  // Background decorations
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 0, 85, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  &__card {
+    position: relative;
+    background: #0e0f16;
+    border: 2px solid $primary;
+    padding: 3rem 3.5rem;
+    width: 100%;
+    max-width: 520px;
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 40px rgba(0, 242, 254, 0.08);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: -14px;
+      bottom: -14px;
+      background: $accent;
+      z-index: -1;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      transform: translate(-5px, -5px);
+
+      &::after { transform: translate(8px, 8px); }
+    }
+  }
+
+  &__info {
+    margin-bottom: 2.5rem;
+
+    h3 {
+      font-family: $font-display;
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    p {
+      color: #555d7a;
+      margin-top: 12px;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(255, 0, 85, 0.15);
+    border: 1px solid rgba(255, 0, 85, 0.4);
+    color: $accent;
+    font-family: $font-display;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  &__submit {
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid $primary;
+    color: $primary;
+    padding: 16px 20px;
+    font-family: $font-display;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+    @include clip-skew(10px);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: $primary;
+      transform: translateX(-105%);
+      transition: transform 0.35s ease;
+      z-index: -1;
+    }
+
+    &:hover {
+      color: #000;
+      @include box-glow($primary, 0.35);
+
+      &::before { transform: translateX(0); }
+
+      i { transform: translateX(4px); }
+    }
+
+    i {
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+  }
+
+  &__note {
+    margin-top: 20px;
+    font-size: 0.72rem;
+    color: #303545;
+    text-align: center;
+    letter-spacing: 0.5px;
+
+    a {
+      color: $primary;
+      text-decoration: none;
+    }
+  }
+}
+
+// ─── CARD CORNERS ────────────────────────────────────────────────────────────
+.corner {
+  @include corner-border();
+
+  &--tl { top: -1px;    left: -1px;  border-width: 2px 0 0 2px; }
+  &--tr { top: -1px;    right: -1px; border-width: 2px 2px 0 0; }
+  &--bl { bottom: -1px; left: -1px;  border-width: 0 0 2px 2px; }
+  &--br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+}
+
+// ─── INPUT GROUP ─────────────────────────────────────────────────────────────
+.input-group {
+  position: relative;
+
+  input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #222a3a;
+    padding: 12px 0;
+    color: white;
+    font-family: $font-body;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    outline: none;
+
+    &::placeholder { color: #363d52; font-size: 0.9rem; }
+
+    &:focus ~ .line { width: 100%; }
+
+    &:focus ~ .input-label,
+    &:not(:placeholder-shown) ~ .input-label {
+      top: -14px;
+      font-size: 0.55rem;
+      color: $primary;
+      @include glow($primary, 8px);
+    }
+  }
+}
+
+.line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, $primary, $secondary);
+  transition: 0.4s ease;
+  box-shadow: 0 0 8px $primary;
+}
+
+.input-label {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #363d52;
+  font-family: $font-display;
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+// ─── RESPONSIVE ──────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .navbar {
+    &__container { padding: 0 30px; }
+
+    &__menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background: rgba(10, 11, 16, 0.98);
+      backdrop-filter: blur(20px);
+      padding: 20px;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+      &.open { display: flex; }
+    }
+
+    &__bars { display: flex; }
+  }
+
+  .hero {
+    &__content {
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding: 60px 30px;
+    }
+
+    &__actions { justify-content: center; }
+
+    &__visual { order: -1; }
+
+    &__img-wrapper { width: 240px; height: 240px; }
+
+    &__stats {
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  .blob-shape { width: 280px; height: 280px; }
+
+  .signup__card { padding: 2.5rem 2rem; }
+
+  .signup__info h3 { font-size: 1.3rem; }
+}
